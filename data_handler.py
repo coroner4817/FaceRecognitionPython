@@ -10,11 +10,12 @@ from PostHandler import postHandler
 
 class DataHandler(ThreadBaseClass):
 
-  def setConfig(self, dm, lm, v, ps):
+  def setConfig(self, dm, lm, v, ps, mf):
     self.detection_model = dm
     self.landmarks_model = lm
     self.verbose = v
     self.poolsize = ps
+    self.mark_face = mf
 
   def start(self):
     super(DataHandler, self).start()
@@ -51,7 +52,7 @@ class DataHandler(ThreadBaseClass):
         unknown_encodings = face_recognition.face_encodings(unknown_image, None, 1, self.landmarks_model, self.detection_model)
 
         # post handler
-        postHandler(handle, unknown_encodings)
+        postHandler(handle, unknown_encodings, self.mark_face)
         self.gc.fileSet.remove(handle.filename)
 
         ptime = time.clock() - t0

@@ -16,12 +16,13 @@ isActive = True
 @click.option('--data_folder', default='./captures/', help='Data folder for searching for input files')
 @click.option('--file_ext', default='.JPG', help='Image file extension of the camera output')
 @click.option('--scan_rate', default=1, help='How long to sleep before next file scan, should match camera dump rate')
+@click.option('--mark_face', default=False, type=bool, help='If set to True will draw a bounding box on the output image')
 @click.option('--monitor_health', default=False, type=bool, help='If set True then if a thread is blocked the whole program will exit and restarted by the monitor process')
 @click.option('--downsampling_scale', default=1, help='The scale for downsampling the image before processing')
-def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, monitor_health, downsampling_scale):
+def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, monitor_health, downsampling_scale):
   if verbose > 0:
-    print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, monitor_health, downsampling_scale
-  pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate)
+    print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, monitor_health, downsampling_scale
+  pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face)
   pc.startUp()
 
   # busy loop to hold the main thread not exit
