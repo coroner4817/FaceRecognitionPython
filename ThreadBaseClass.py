@@ -9,19 +9,20 @@ class GlobalContext(object):
   errorCnt = 0
   avgProcessTime = 0
   highestProcessTime = 0
+  timeTrackDict = dict()
+  currProcessing = dict()
 
   def __init__(self):
     pass
 
 class ThreadBaseClass(object):
   gc = None
-  isAlive = True
-  threadList = []
-  name = None
 
   def __init__(self, glc, name):
     self.gc = glc
     self.name = name
+    self.isAlive = True
+    self.threadList = []
     pass
   
   def start(self):

@@ -21,6 +21,7 @@
 from input_monitor import InputMonitor
 from ThreadBaseClass import ThreadBaseClass, GlobalContext
 from data_handler import DataHandler
+from monitor_dog import MonitorDog
 
 class Controller(object):
   ThreadBaseClassList = []
@@ -34,10 +35,13 @@ class Controller(object):
     self.mDataHandler = DataHandler(self.mGC, 'DataHandler')
     self.ThreadBaseClassList.append(self.mDataHandler)
 
-  def setConfig(self, detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face):
+  def setConfig(self, detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale):
     self.mInputMonitor.setConfig(data_folder, file_ext, scan_rate)
-    self.mDataHandler.setConfig(detection_model, landmarks_model, verbose, poolsize, mark_face)
-    pass
+    self.mDataHandler.setConfig(detection_model, landmarks_model, verbose, poolsize, mark_face, downsampling_scale)
+    if thread_timeout > 0:
+      self.mMonitorDog = MonitorDog(self.mGC, 'MonitorDog')
+      self.ThreadBaseClassList.append(self.mMonitorDog)
+      self.mMonitorDog.setConfig(thread_timeout)
 
   def startUp(self):
     # start all the ThreadBaseClass

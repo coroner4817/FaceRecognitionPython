@@ -14,7 +14,7 @@ from PIL import ImageDraw
 
 out_test_folder = './out_test/'
 
-def postHandler(meta, embeddings, mark_face):
+def postHandler(meta, embeddings, dscale, mark_face):
   meta_dst = out_test_folder + meta.timestamp + '_meta.csv'
   img_out_dst = out_test_folder+meta.filename
   img_ori_dir = meta.filepath+meta.filename
@@ -22,10 +22,8 @@ def postHandler(meta, embeddings, mark_face):
   with open(meta_dst, 'wb') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow([meta.timestamp, meta.filepath, meta.filename])
-    id = 0
-    for i in embeddings:
-      writer.writerow([str(id), i[1], i[0]])
-      id = id + 1
+    for i in range(len(embeddings)):
+      writer.writerow([str(i), (embeddings[i][1].left()*dscale, embeddings[i][1].top()*dscale, embeddings[i][1].right()*dscale, embeddings[i][1].bottom()*dscale), embeddings[i][0]])
 
   # TODO: upload image and meta to server
   copyfile(img_ori_dir, img_out_dst)
@@ -33,7 +31,7 @@ def postHandler(meta, embeddings, mark_face):
     im = PIL.Image.open(img_out_dst)
     draw = ImageDraw.Draw(im)
     for eb in embeddings:
-      draw.rectangle((eb[1].left(), eb[1].top(), eb[1].right(), eb[1].bottom()), outline=(255,0,0))
+      draw.rectangle((eb[1].left()*dscale, eb[1].top()*dscale, eb[1].right()*dscale, eb[1].bottom()*dscale), outline=(255,0,0))
     im.save(img_out_dst)
 
   # delete original image and meta
