@@ -34,6 +34,11 @@ class Controller(object):
     self.mDataHandler = DataHandler(self.mGC, 'DataHandler')
     self.ThreadBaseClassList.append(self.mDataHandler)
 
+  def setConfig(self, detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate):
+    self.mInputMonitor.setConfig(data_folder, file_ext, scan_rate)
+    self.mDataHandler.setConfig(detection_model, landmarks_model, verbose, poolsize)
+    pass
+
   def startUp(self):
     # start all the ThreadBaseClass
     for t in self.ThreadBaseClassList:
@@ -46,7 +51,7 @@ class Controller(object):
       t.stop()
   
   def logInfo(self):
-    print '<HeartBeat CurrQueue: %s, ProcessedCnt: %s, ErrorCnt: %s>' % (str(self.mGC.msgQueue.qsize()), str(self.mGC.processedCnt), str(self.mGC.errorCnt))
+    print '<HeartBeat CurrQueue: %s, ProcessedCnt: %s, ErrorCnt: %s, AvgProcessTime: %s, HighestProcessTime: %s>' % (str(self.mGC.msgQueue.qsize()), str(self.mGC.processedCnt), str(self.mGC.errorCnt), str(self.mGC.avgProcessTime), str(self.mGC.highestProcessTime))
 
   def isHealth(self):
     pass

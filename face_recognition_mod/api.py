@@ -148,15 +148,15 @@ def batch_face_locations(images, number_of_times_to_upsample=1, batch_size=128):
     return list(map(convert_cnn_detections_to_css, raw_detections_batched))
 
 
-def _raw_face_landmarks(face_image, face_locations=None, model="large"):
+def _raw_face_landmarks(face_image, face_locations=None, landmarks_model="large", detection_model="hog"):
     if face_locations is None:
-        face_locations = _raw_face_locations(face_image)
+        face_locations = _raw_face_locations(face_image, 1, detection_model)
     else:
         face_locations = [_css_to_rect(face_location) for face_location in face_locations]
 
     pose_predictor = pose_predictor_68_point
 
-    if model == "small":
+    if landmarks_model == "small":
         pose_predictor = pose_predictor_5_point
 
     return [(pose_predictor(face_image, face_location), face_location) for face_location in face_locations]
@@ -197,7 +197,7 @@ def face_landmarks(face_image, face_locations=None, model="large"):
         raise ValueError("Invalid landmarks model type. Supported models are ['small', 'large'].")
 
 
-def face_encodings(face_image, known_face_locations=None, num_jitters=1):
+def face_encodings(face_image, known_face_locations=None, num_jitters=1, landmarks_model="small", detection_model="hog"):
     """
     Given an image, return the 128-dimension face encoding for each face in the image.
 
@@ -206,7 +206,7 @@ def face_encodings(face_image, known_face_locations=None, num_jitters=1):
     :param num_jitters: How many times to re-sample the face when calculating encoding. Higher is more accurate, but slower (i.e. 100 is 100x slower)
     :return: A list of 128-dimensional face encodings (one for each face in the image)
     """
-    raw_landmarks = _raw_face_landmarks(face_image, known_face_locations, model="small")
+    raw_landmarks = _raw_face_landmarks(face_image, known_face_locations, landmarks_model, detection_model)
     return [(np.array(face_encoder.compute_face_descriptor(face_image, raw_landmark_set[0], num_jitters)), raw_landmark_set[1]) for raw_landmark_set in raw_landmarks]
 
 

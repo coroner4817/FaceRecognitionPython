@@ -6,7 +6,9 @@ class GlobalContext(object):
   msgQueue = Queue()
   fileSet = set()
   processedCnt = 0
-  errorCnt = 0;
+  errorCnt = 0
+  avgProcessTime = 0
+  highestProcessTime = 0
 
   def __init__(self):
     pass
