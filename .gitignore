@@ -1,0 +1,9 @@
+**/.pyc
+**/.DS_*
+**/.csv
+**/.JPG
+
+captures/
+out_test/
+
+test.py
