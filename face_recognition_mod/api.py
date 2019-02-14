@@ -3,6 +3,7 @@
 import PIL.Image
 import dlib
 import numpy as np
+import time
 
 try:
     import face_recognition_models
@@ -80,12 +81,15 @@ def load_image_file(file, mode='RGB', dscale=1):
     :param mode: format to convert the image to. Only 'RGB' (8-bit RGB, 3 channels) and 'L' (black and white) are supported.
     :return: image contents as numpy array
     """
+    t0 = time.clock()
     im = PIL.Image.open(file)
+    t1 = time.clock()
     if dscale != 1:
-      im.thumbnail((im.size[0]/dscale, im.size[1]/dscale))
+        im.thumbnail((im.size[0]/dscale, im.size[1]/dscale))
     if im.mode != mode:
         im = im.convert(mode)
-    return np.array(im)
+    t2 = time.clock()
+    return np.array(im), t1-t0, t2-t1
 
 
 def _raw_face_locations(img, number_of_times_to_upsample=1, model="hog"):
@@ -151,6 +155,7 @@ def batch_face_locations(images, number_of_times_to_upsample=1, batch_size=128):
 
 
 def _raw_face_landmarks(face_image, face_locations=None, landmarks_model="large", detection_model="hog"):
+    t0 = time.clock()
     if face_locations is None:
         face_locations = _raw_face_locations(face_image, 1, detection_model)
     else:
@@ -161,7 +166,9 @@ def _raw_face_landmarks(face_image, face_locations=None, landmarks_model="large"
     if landmarks_model == "small":
         pose_predictor = pose_predictor_5_point
 
-    return [(pose_predictor(face_image, face_location), face_location) for face_location in face_locations]
+    ret = [(pose_predictor(face_image, face_location), face_location) for face_location in face_locations]
+    t1 = time.clock()
+    return ret, t1-t0
 
 
 def face_landmarks(face_image, face_locations=None, model="large"):
@@ -208,8 +215,13 @@ def face_encodings(face_image, known_face_locations=None, num_jitters=1, landmar
     :param num_jitters: How many times to re-sample the face when calculating encoding. Higher is more accurate, but slower (i.e. 100 is 100x slower)
     :return: A list of 128-dimensional face encodings (one for each face in the image)
     """
-    raw_landmarks = _raw_face_landmarks(face_image, known_face_locations, landmarks_model, detection_model)
-    return [(np.array(face_encoder.compute_face_descriptor(face_image, raw_landmark_set[0], num_jitters)), raw_landmark_set[1]) for raw_landmark_set in raw_landmarks]
+    raw_landmarks, t_detect = _raw_face_landmarks(face_image, known_face_locations, landmarks_model, detection_model)
+
+    t_recog = time.clock()
+    ret = [(np.array(face_encoder.compute_face_descriptor(face_image, raw_landmark_set[0], num_jitters)), raw_landmark_set[1]) for raw_landmark_set in raw_landmarks]
+    t_recog = time.clock() - t_recog
+
+    return ret, t_detect, t_recog
 
 
 def compare_faces(known_face_encodings, face_encoding_to_check, tolerance=0.6):

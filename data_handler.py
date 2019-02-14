@@ -10,13 +10,14 @@ from PostHandler import postHandler
 
 class DataHandler(ThreadBaseClass):
 
-  def setConfig(self, dm, lm, v, ps, mf, ds):
+  def setConfig(self, dm, lm, v, ps, mf, ds, ph):
     self.detection_model = dm
     self.landmarks_model = lm
     self.verbose = v
     self.poolsize = ps
     self.mark_face = mf
     self.downsampling_scale = ds
+    self.post_handle = ph
 
   def start(self):
     super(DataHandler, self).start()
@@ -49,28 +50,30 @@ class DataHandler(ThreadBaseClass):
         # TODO: figure out which downsample resample filter
         # also detection and recognition which is more critical
         # might use downsample for detection and use original image for recognition
-        unknown_image = face_recognition.load_image_file(handle.filepath + handle.filename, dscale=self.downsampling_scale)
+        unknown_image, t_load, t_preProc = face_recognition.load_image_file(handle.filepath + handle.filename, dscale=self.downsampling_scale)
         # Scale down image if it's giant so things run a little faster
-        if max(unknown_image.shape) > 1600:
-          # TODO: downsampling
-          pil_img = PIL.Image.fromarray(unknown_image)
-          pil_img.thumbnail((1600, 1600), PIL.Image.LANCZOS)
-          unknown_image = np.array(pil_img)
-        unknown_encodings = face_recognition.face_encodings(unknown_image, None, 1, self.landmarks_model, self.detection_model)
+        # if max(unknown_image.shape) > 1600:
+        #   pil_img = PIL.Image.fromarray(unknown_image)
+        #   pil_img.thumbnail((1600, 1600), PIL.Image.LANCZOS)
+        #   unknown_image = np.array(pil_img)
+        unknown_encodings, t_detect, t_recog = face_recognition.face_encodings(unknown_image, None, 1, self.landmarks_model, self.detection_model)
 
         # post handler
-        postHandler(handle, unknown_encodings, self.downsampling_scale, self.mark_face)
-        self.gc.fileSet.remove(handle.filename)
+        t_post = time.clock()
+        if self.post_handle:
+          postHandler(handle, unknown_encodings, self.downsampling_scale, self.mark_face)
+          self.gc.fileSet.remove(handle.filename)
+        t_post = time.clock() - t_post
 
         ptime = time.clock() - t0
         if self.verbose > 1:
-          print 'Thread id ' + str(id) + ': ' + 'find ' + str(len(unknown_encodings)) + ' face. Time: ' + str(ptime)
+          print '(Thread id: %s, Face: %s, OverallTime: %s, Load: %s, PreProc: %s, Detection: %s, Recognition: %s, PostHandle: %s)' % (str(id), str(len(unknown_encodings)), str(ptime), str(t_load), str(t_preProc), str(t_detect), str(t_recog), str(t_post))
         self.gc.avgProcessTime = (self.gc.avgProcessTime*(self.gc.processedCnt-1)+ptime)/(float)(self.gc.processedCnt)
         if ptime > self.gc.highestProcessTime:
           self.gc.highestProcessTime = ptime
-      except:
+      except Exception as e:
         if self.verbose > 1:
-          print 'A error happened when parsing this file. Continue handling'
+          print 'A error happened: ' + e + ' Continue handling...'
         self.gc.errorCnt = self.gc.errorCnt + 1
         
       self.gc.timeTrackDict[id] = -1

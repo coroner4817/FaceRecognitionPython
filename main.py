@@ -19,10 +19,11 @@ isActive = True
 @click.option('--mark_face', default=False, type=bool, help='If set to True will draw a bounding box on the output image')
 @click.option('--thread_timeout', default=0, help='Set the timeout for processing time of thread pool. If set to 0 then is not monitored')
 @click.option('--downsampling_scale', default=1, help='The scale for downsampling the image before processing')
-def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale):
+@click.option('--post_handle', default=True, type=bool, help='Whether do the post handling part. Default is True')
+def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle):
   if verbose > 0:
-    print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale
-  pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale)
+    print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle
+  pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle)
   pc.startUp()
 
   # busy loop to hold the main thread not exit
