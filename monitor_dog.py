@@ -16,7 +16,7 @@ class MonitorDog(ThreadBaseClass):
   
   def run(self):
     while self.isAlive:
-      time.sleep(self.timeout)
+      time.sleep(self.timeout+0.01)
       tnow = time.clock()
       for t in self.gc.timeTrackDict:
         if self.gc.timeTrackDict[t] != -1:

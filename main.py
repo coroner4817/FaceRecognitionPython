@@ -29,6 +29,7 @@ def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_
   # busy loop to hold the main thread not exit
   while isActive:
     # TODO: monitor the health of the thread pool
+    time.sleep(0.01)
     if verbose > 0:
       pc.logInfo()
       time.sleep(3)

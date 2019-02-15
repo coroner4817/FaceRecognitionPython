@@ -28,6 +28,7 @@ class DataHandler(ThreadBaseClass):
     print 'Start ThreadPool ' + str(current_thread())
     handle = None
     while self.isAlive:
+      time.sleep(0.01)
       if self.gc.msgQueue.qsize() == 0:
         continue
 
