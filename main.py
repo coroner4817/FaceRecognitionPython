@@ -10,13 +10,13 @@ isActive = True
 
 @click.command()
 @click.option('--detection_model', default="hog", help='Available models: "hog", "cnn", "cnn" is more accurate but slow and might yield error')
-@click.option('--landmarks_model', default="small", help='Available models: "small", "large", "large" is using 68 landmarks points')
+@click.option('--landmarks_model', default="large", help='Available models: "small", "large", "large" is using 68 landmarks points')
 @click.option('--verbose', default=1, help='verbose level 0-2')
-@click.option('--poolsize', default=4, help='ThreadPool size base on CPU number. Recommand 4')
+@click.option('--poolsize', default=1, help='ThreadPool size base on CPU number. Recommand 4')
 @click.option('--data_folder', default='./captures/', help='Data folder for searching for input files')
 @click.option('--file_ext', default='.JPG', help='Image file extension of the camera output')
 @click.option('--scan_rate', default=1, help='How long to sleep before next file scan, should match camera dump rate')
-@click.option('--mark_face', default=False, type=bool, help='If set to True will draw a bounding box on the output image')
+@click.option('--mark_face', default=True, type=bool, help='If set to True will draw a bounding box on the output , to use GUI must turn on this flag')
 @click.option('--thread_timeout', default=0, help='Set the timeout for processing time of thread pool. If set to 0 then is not monitored')
 @click.option('--downsampling_scale', default=1, help='The scale for downsampling the image before processing')
 @click.option('--post_handle', default=True, type=bool, help='Whether do the post handling part. Default is True')
@@ -28,7 +28,6 @@ def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_
 
   # busy loop to hold the main thread not exit
   while isActive:
-    # TODO: monitor the health of the thread pool
     time.sleep(0.01)
     if verbose > 0:
       pc.logInfo()

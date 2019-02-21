@@ -62,7 +62,7 @@ class DataHandler(ThreadBaseClass):
         # post handler
         t_post = time.clock()
         if self.post_handle:
-          postHandler(handle, unknown_encodings, self.downsampling_scale, self.mark_face)
+          face_info_dict = postHandler(handle, unknown_encodings, self.downsampling_scale, self.mark_face)
           self.gc.fileSet.remove(handle.filename)
         t_post = time.clock() - t_post
 
