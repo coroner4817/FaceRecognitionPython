@@ -20,7 +20,7 @@ def compareFaceLocal():
   # TODO:
   pass
 
-def postHandler(meta, embeddings, dscale, mark_face):
+def postHandler(meta, embeddings, dscale, mark_face, dist_thresh):
   meta_dst = out_test_folder + meta.timestamp + '_meta.csv'
   img_out_dst = out_test_folder + meta.filename
   img_ori_dir = meta.filepath + meta.filename
@@ -55,8 +55,7 @@ def postHandler(meta, embeddings, dscale, mark_face):
       draw.rectangle((eb[1][1].left()*dscale, eb[1][1].top()*dscale, eb[1][1].right()*dscale, eb[1][1].bottom()*dscale), outline=(255,0,0))
     im.save(img_out_dst)
 
-  # delete original image and meta
-  os.remove(img_ori_dir)
+  # TODO: delete meta file and croped face and frame images, delay deletion
   # os.remove(meta_dst)
 
   return face_map, img_out_dst

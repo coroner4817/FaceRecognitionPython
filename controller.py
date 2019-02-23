@@ -35,9 +35,9 @@ class Controller(object):
     self.mDataHandler = DataHandler(self.mGC, 'DataHandler')
     self.ThreadBaseClassList.append(self.mDataHandler)
 
-  def setConfig(self, detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle):
+  def setConfig(self, detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh):
     self.mInputMonitor.setConfig(data_folder, file_ext, scan_rate)
-    self.mDataHandler.setConfig(detection_model, landmarks_model, verbose, poolsize, mark_face, downsampling_scale, post_handle)
+    self.mDataHandler.setConfig(detection_model, landmarks_model, verbose, poolsize, mark_face, downsampling_scale, post_handle, avoid_duplicate, distance_thresh)
     if thread_timeout > 0:
       self.mMonitorDog = MonitorDog(self.mGC, 'MonitorDog')
       self.ThreadBaseClassList.append(self.mMonitorDog)

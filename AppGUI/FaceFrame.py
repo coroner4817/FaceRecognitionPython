@@ -1,5 +1,4 @@
-from tkinter import *
-from tkinter import ttk
+from Tkinter import *
 from PIL import Image, ImageTk
 
 class FaceFrame(Frame):

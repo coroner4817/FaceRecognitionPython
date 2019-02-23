@@ -7,11 +7,13 @@ import PIL.Image
 import numpy as np
 from PostHandler import postHandler
 from AppGUI.AppView import UpdateType
+import os
 
 
 class DataHandler(ThreadBaseClass):
+  last_encoding = []
 
-  def setConfig(self, dm, lm, v, ps, mf, ds, ph):
+  def setConfig(self, dm, lm, v, ps, mf, ds, ph, ad, dt):
     self.detection_model = dm
     self.landmarks_model = lm
     self.verbose = v
@@ -19,6 +21,8 @@ class DataHandler(ThreadBaseClass):
     self.mark_face = mf
     self.downsampling_scale = ds
     self.post_handle = ph
+    self.avoid_duplicate = ad
+    self.distance_thresh = dt
 
   def setListener(self, listener):
     self.updateListener = listener
@@ -65,8 +69,20 @@ class DataHandler(ThreadBaseClass):
 
         # post handler
         t_post = time.clock()
+        valid_encoding = []
+        if self.avoid_duplicate and len(self.last_encoding) > 0:
+          for eb in unknown_encodings:
+            dist = face_recognition.face_distance(zip(*self.last_encoding)[0], eb[0])
+            print dist
+            if np.min(dist) > self.distance_thresh:
+              valid_encoding.append(eb)
+        else:
+          valid_encoding = unknown_encodings
+        self.last_encoding = unknown_encodings
+
         if self.post_handle:
-          face_info_dict, stream_path = postHandler(handle, unknown_encodings, self.downsampling_scale, self.mark_face)
+          face_info_dict, stream_path = postHandler(handle, valid_encoding, self.downsampling_scale, self.mark_face, self.distance_thresh)
+          os.remove(handle.filepath + handle.filename)
           self.gc.fileSet.remove(handle.filename)
 
           self.updateListener(UpdateType.DETECTION, face_info_dict)

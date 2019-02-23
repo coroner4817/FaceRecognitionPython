@@ -9,7 +9,7 @@ pc = Controller()
 isActive = True
 
 from AppGUI.AppView import *
-from tkinter import *
+from Tkinter import *
 root = Tk()
 view = AppView(root)
 
@@ -29,10 +29,12 @@ def updateLoop():
 @click.option('--thread_timeout', default=0, help='Set the timeout for processing time of thread pool. If set to 0 then is not monitored')
 @click.option('--downsampling_scale', default=1, help='The scale for downsampling the image before processing')
 @click.option('--post_handle', default=True, type=bool, help='Whether do the post handling part. Default is True')
-def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle):
+@click.option('--avoid_duplicate', default=False, type=bool, help='Whether report if already found in last frame')
+@click.option('--distance_thresh', default=0.5, type=float, help='Distance threshold of determining if is the same person')
+def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh):
   if verbose > 0:
-    print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle
-  pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle)
+    print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh
+  pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh)
   pc.setListener(view.getOnUpdate())
   pc.startUp()
 
