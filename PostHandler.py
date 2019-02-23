@@ -59,4 +59,4 @@ def postHandler(meta, embeddings, dscale, mark_face):
   os.remove(img_ori_dir)
   # os.remove(meta_dst)
 
-  return face_map
+  return face_map, img_out_dst

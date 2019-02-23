@@ -8,6 +8,15 @@ from controller import Controller
 pc = Controller()
 isActive = True
 
+from AppGUI.AppView import *
+from tkinter import *
+root = Tk()
+view = AppView(root)
+
+def updateLoop():
+  pc.logInfo()
+  root.after(3000, updateLoop)
+
 @click.command()
 @click.option('--detection_model', default="hog", help='Available models: "hog", "cnn", "cnn" is more accurate but slow and might yield error')
 @click.option('--landmarks_model', default="large", help='Available models: "small", "large", "large" is using 68 landmarks points')
@@ -24,14 +33,12 @@ def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_
   if verbose > 0:
     print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle
   pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle)
+  pc.setListener(view.getOnUpdate())
   pc.startUp()
 
-  # busy loop to hold the main thread not exit
-  while isActive:
-    time.sleep(0.01)
-    if verbose > 0:
-      pc.logInfo()
-      time.sleep(3)
+  root.after(0, updateLoop)
+  root.mainloop()
+  print 'Exit application'
 
 def SIGINT_handler(signal, frame):
   print '\nuser ctrl+c terminate program...'

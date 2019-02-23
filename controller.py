@@ -43,6 +43,9 @@ class Controller(object):
       self.ThreadBaseClassList.append(self.mMonitorDog)
       self.mMonitorDog.setConfig(thread_timeout)
 
+  def setListener(self, listener):
+    self.mDataHandler.setListener(listener)
+
   def startUp(self):
     # start all the ThreadBaseClass
     for t in self.ThreadBaseClassList:

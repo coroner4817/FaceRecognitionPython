@@ -6,6 +6,7 @@ import time
 import PIL.Image
 import numpy as np
 from PostHandler import postHandler
+from AppGUI.AppView import UpdateType
 
 
 class DataHandler(ThreadBaseClass):
@@ -18,6 +19,9 @@ class DataHandler(ThreadBaseClass):
     self.mark_face = mf
     self.downsampling_scale = ds
     self.post_handle = ph
+
+  def setListener(self, listener):
+    self.updateListener = listener
 
   def start(self):
     super(DataHandler, self).start()
@@ -62,8 +66,11 @@ class DataHandler(ThreadBaseClass):
         # post handler
         t_post = time.clock()
         if self.post_handle:
-          face_info_dict = postHandler(handle, unknown_encodings, self.downsampling_scale, self.mark_face)
+          face_info_dict, stream_path = postHandler(handle, unknown_encodings, self.downsampling_scale, self.mark_face)
           self.gc.fileSet.remove(handle.filename)
+
+          self.updateListener(UpdateType.DETECTION, face_info_dict)
+          self.updateListener(UpdateType.STREAM, stream_path)
         t_post = time.clock() - t_post
 
         ptime = time.clock() - t0
@@ -72,8 +79,10 @@ class DataHandler(ThreadBaseClass):
         self.gc.avgProcessTime = (self.gc.avgProcessTime*(self.gc.processedCnt-1)+ptime)/(float)(self.gc.processedCnt)
         if ptime > self.gc.highestProcessTime:
           self.gc.highestProcessTime = ptime
+
+        self.updateListener(UpdateType.META, [str(self.gc.msgQueue.qsize()), str(self.gc.processedCnt), str(self.gc.errorCnt), str(self.gc.avgProcessTime), str(self.gc.highestProcessTime)])
       except Exception as e:
-        if self.verbose > 1:
+        if self.verbose > 0:
           print 'A error happened: ' + e + ' Continue handling...'
         self.gc.errorCnt = self.gc.errorCnt + 1
         
