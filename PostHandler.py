@@ -36,6 +36,7 @@ def postHandler(meta, embeddings, dscale, mark_face, dist_thresh):
       face_map[eb[0]] = FaceMetaData(eb[0], meta.timestamp)
 
   # TODO: upload image and meta to server
+  # block call
   copyfile(img_ori_dir, img_out_dst)
   # TODO: assume get the sync recogition info
   for eb in embeddings:
@@ -56,6 +57,6 @@ def postHandler(meta, embeddings, dscale, mark_face, dist_thresh):
     im.save(img_out_dst)
 
   # TODO: delete meta file and croped face and frame images, delay deletion
-  # os.remove(meta_dst)
+  os.remove(meta_dst)
 
   return face_map, img_out_dst

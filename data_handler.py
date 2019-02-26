@@ -82,11 +82,15 @@ class DataHandler(ThreadBaseClass):
 
         if self.post_handle:
           face_info_dict, stream_path = postHandler(handle, valid_encoding, self.downsampling_scale, self.mark_face, self.distance_thresh)
-          os.remove(handle.filepath + handle.filename)
-          self.gc.fileSet.remove(handle.filename)
-
           self.updateListener(UpdateType.DETECTION, face_info_dict)
           self.updateListener(UpdateType.STREAM, stream_path)
+
+          # delete cache files
+          os.remove(handle.filepath + handle.filename)
+          self.gc.fileSet.remove(handle.filename)
+          os.remove(stream_path)
+          for face in face_info_dict:
+            os.remove(face_info_dict[face].filepath)
         t_post = time.clock() - t_post
 
         ptime = time.clock() - t0
@@ -96,7 +100,7 @@ class DataHandler(ThreadBaseClass):
         if ptime > self.gc.highestProcessTime:
           self.gc.highestProcessTime = ptime
 
-        self.updateListener(UpdateType.META, [str(self.gc.msgQueue.qsize()), str(self.gc.processedCnt), str(self.gc.errorCnt), str(self.gc.avgProcessTime), str(self.gc.highestProcessTime)])
+        self.updateListener(UpdateType.META, ["Current Queue: " + str(self.gc.msgQueue.qsize()), "Processed: " + str(self.gc.processedCnt), "Error: " + str(self.gc.errorCnt), "Avg time: " + str(self.gc.avgProcessTime), "Highest time: " + str(self.gc.highestProcessTime)])
       except Exception as e:
         if self.verbose > 0:
           print 'A error happened: ' + e + ' Continue handling...'

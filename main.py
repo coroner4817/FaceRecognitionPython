@@ -17,6 +17,11 @@ def updateLoop():
   pc.logInfo()
   root.after(3000, updateLoop)
 
+def on_close():
+  pc.cleanUp()
+  isActive = False
+  sys.exit(0)
+
 @click.command()
 @click.option('--detection_model', default="hog", help='Available models: "hog", "cnn", "cnn" is more accurate but slow and might yield error')
 @click.option('--landmarks_model', default="large", help='Available models: "small", "large", "large" is using 68 landmarks points')
@@ -31,22 +36,24 @@ def updateLoop():
 @click.option('--post_handle', default=True, type=bool, help='Whether do the post handling part. Default is True')
 @click.option('--avoid_duplicate', default=False, type=bool, help='Whether report if already found in last frame')
 @click.option('--distance_thresh', default=0.5, type=float, help='Distance threshold of determining if is the same person')
-def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh):
+@click.option('--use_camera', default=True, type=bool, help='Use camera as input')
+def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera):
   if verbose > 0:
-    print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh
-  pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh)
+    print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera
+
+  view.setConfig(verbose)
+  pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera)
   pc.setListener(view.getOnUpdate())
   pc.startUp()
 
+  root.protocol("WM_DELETE_WINDOW", on_close)
   root.after(0, updateLoop)
   root.mainloop()
   print 'Exit application'
 
 def SIGINT_handler(signal, frame):
   print '\nuser ctrl+c terminate program...'
-  pc.cleanUp()
-  isActive = False
-  sys.exit(0)
+  on_close()
 
 if __name__ == '__main__': 
   signal.signal(signal.SIGINT, SIGINT_handler)

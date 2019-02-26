@@ -1,11 +1,11 @@
 import threading
 import time
-from Queue import Queue
+from Queue import PriorityQueue
 
 MAX_QUEUE_SIZE = 15
 
 class GlobalContext(object):
-  msgQueue = Queue(MAX_QUEUE_SIZE)
+  msgQueue = PriorityQueue(MAX_QUEUE_SIZE)
   fileSet = set()
   processedCnt = 0
   errorCnt = 0
