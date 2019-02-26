@@ -10,10 +10,12 @@ from AppGUI.AppView import UpdateType
 import os
 
 
+SUSPECT_DATABASE_PATH = './suspects/'
+
 class DataHandler(ThreadBaseClass):
   last_encoding = []
 
-  def setConfig(self, dm, lm, v, ps, mf, ds, ph, ad, dt):
+  def setConfig(self, dm, lm, v, ps, mf, ds, ph, ad, dt, fe, ls):
     self.detection_model = dm
     self.landmarks_model = lm
     self.verbose = v
@@ -23,6 +25,16 @@ class DataHandler(ThreadBaseClass):
     self.post_handle = ph
     self.avoid_duplicate = ad
     self.distance_thresh = dt
+    self.load_suspect = ls
+    self.local_suspect_list = []
+    if self.load_suspect:
+      # load suspect database first, assume each database only have one face
+      for f in os.listdir(SUSPECT_DATABASE_PATH):
+        if f.endswith(fe):
+          if self.verbose > 0: print 'Suspect name: ' + os.path.splitext(f)[0]
+          unknown_image, _, _ = face_recognition.load_image_file(SUSPECT_DATABASE_PATH+f, dscale=self.downsampling_scale)
+          unknown_encodings, _, _ = face_recognition.face_encodings(unknown_image, None, 1, self.landmarks_model, self.detection_model)
+          self.local_suspect_list.append((os.path.splitext(f)[0], unknown_encodings[0][0]))
 
   def setListener(self, listener):
     self.updateListener = listener
@@ -73,7 +85,6 @@ class DataHandler(ThreadBaseClass):
         if self.avoid_duplicate and len(self.last_encoding) > 0:
           for eb in unknown_encodings:
             dist = face_recognition.face_distance(zip(*self.last_encoding)[0], eb[0])
-            print dist
             if np.min(dist) > self.distance_thresh:
               valid_encoding.append(eb)
         else:
@@ -81,9 +92,9 @@ class DataHandler(ThreadBaseClass):
         self.last_encoding = unknown_encodings
 
         if self.post_handle:
-          face_info_dict, stream_path = postHandler(handle, valid_encoding, self.downsampling_scale, self.mark_face, self.distance_thresh)
-          self.updateListener(UpdateType.DETECTION, face_info_dict)
+          face_info_dict, stream_path = postHandler(handle, valid_encoding, self.downsampling_scale, self.mark_face, self.distance_thresh, self.local_suspect_list)
           self.updateListener(UpdateType.STREAM, stream_path)
+          self.updateListener(UpdateType.DETECTION, face_info_dict)
 
           # delete cache files
           os.remove(handle.filepath + handle.filename)

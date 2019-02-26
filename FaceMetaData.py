@@ -10,6 +10,7 @@ class FaceMetaData(object):
     self.timestamp = ts
     self.filepath = ''
     self.isSuspect = False
+    self.suspect_name = ''
 
   def __str__(self):
-    return '<FaceMeta: %s, TimeStamp: %s, FilePath: %s, isSuspect: %s>' % (str(self.id), self.timestamp, self.filepath, str(self.isSuspect))
+    return '<FaceMeta: %s, TimeStamp: %s, FilePath: %s, isSuspect: %s, suspect_name: %s>' % (str(self.id), self.timestamp, self.filepath, str(self.isSuspect), self.suspect_name)

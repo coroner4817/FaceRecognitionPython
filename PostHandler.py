@@ -13,6 +13,8 @@ import PIL
 from PIL import ImageDraw
 from FaceMetaData import *
 import random
+import face_recognition_mod.api as face_recognition
+import numpy as np
 
 out_test_folder = './out_test/'
 
@@ -20,7 +22,7 @@ def compareFaceLocal():
   # TODO:
   pass
 
-def postHandler(meta, embeddings, dscale, mark_face, dist_thresh):
+def postHandler(meta, embeddings, dscale, mark_face, dist_thresh, local_suspect_list):
   meta_dst = out_test_folder + meta.timestamp + '_meta.csv'
   img_out_dst = out_test_folder + meta.filename
   img_ori_dir = meta.filepath + meta.filename
@@ -39,8 +41,13 @@ def postHandler(meta, embeddings, dscale, mark_face, dist_thresh):
   # block call
   copyfile(img_ori_dir, img_out_dst)
   # TODO: assume get the sync recogition info
-  for eb in embeddings:
-    face_map[eb[0]].isSuspect = bool(random.getrandbits(1))
+  if len(local_suspect_list) > 0:
+    for eb in embeddings:
+      dist = face_recognition.face_distance(eb[1][0], zip(*local_suspect_list)[1])
+      min_index = dist.argmin()
+      if dist[min_index] < dist_thresh:
+        face_map[eb[0]].isSuspect = True
+        face_map[eb[0]].suspect_name = local_suspect_list[min_index][0]
 
   if mark_face:
     im = PIL.Image.open(img_out_dst)

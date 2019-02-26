@@ -6,6 +6,7 @@ from MetaData import MetaData
 import cv2
 
 CAM_NAME = 0
+CAM_FRAME_RATE = 25
 
 class InputMonitor(ThreadBaseClass):
 
@@ -15,6 +16,7 @@ class InputMonitor(ThreadBaseClass):
     self.scan_rate = sr
     self.use_camera = uc
     if self.use_camera:
+      self.frame_counter = 0
       self.cap = cv2.VideoCapture(CAM_NAME)
 
   def start(self):
@@ -27,7 +29,7 @@ class InputMonitor(ThreadBaseClass):
     while self.isAlive:
       if self.use_camera and self.cap.isOpened():
         ret, frame = self.cap.read()
-        if ret:
+        if ret and self.frame_counter%(CAM_FRAME_RATE*self.scan_rate)==0:
           # dump to file
           fname = time.strftime("%H-%M-%S")+self.file_extension
           cv2.imwrite(self.data_folder+fname, frame)
@@ -35,7 +37,7 @@ class InputMonitor(ThreadBaseClass):
           self.gc.fileSet.add(fname)
           msg = MetaData(self.data_folder, fname)
           self.gc.msgQueue.put(msg)
-        cv2.waitKey(self.scan_rate * 1000)
+        self.frame_counter = self.frame_counter + 1
       else:
         time.sleep(self.scan_rate)
         # check the file list

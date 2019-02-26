@@ -18,7 +18,7 @@ class UpdateType(Enum):
   DETECTION = 1 # all and suspect
   META = 2  
 
-ALL_FACE_SIZE = 9
+ALL_FACE_SIZE = 12
 SUSPECT_FACE_SIZE = 4
 
 threadLock = threading.Lock()
@@ -82,14 +82,14 @@ class AppView(object):
     self.suspect_face_frame1 = Frame(self.root)
     self.suspect_face_frame1.grid(column=1, row=0, sticky=(W, S))
     for i in range(SUSPECT_FACE_SIZE):
-      temp = FaceFrame(self.suspect_face_frame1)
+      temp = FaceFrame(self.suspect_face_frame1, True)
       temp.pack(side=BOTTOM)
       self.suspectFaceFrames.append(temp)
 
     self.suspect_face_frame2 = Frame(self.root)
     self.suspect_face_frame2.grid(column=2, row=0, sticky=(W, S))
     for i in range(SUSPECT_FACE_SIZE):
-      temp = FaceFrame(self.suspect_face_frame2)
+      temp = FaceFrame(self.suspect_face_frame2, True)
       temp.pack(side=BOTTOM)
       self.suspectFaceFrames.append(temp)
 
@@ -103,7 +103,7 @@ class AppView(object):
 
     for child in self.root.winfo_children(): child.grid_configure(padx=5, pady=5)
 
-  def renderLabelImage(self, label, path, dscale=2):
+  def renderLabelImage(self, label, path, dscale=1.5):
     load = Image.open(path)
     load.thumbnail((load.size[0]/dscale, load.size[1]/dscale))
     img = ImageTk.PhotoImage(load)

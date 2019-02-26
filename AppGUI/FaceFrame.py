@@ -12,23 +12,35 @@ FACE_IMG_SZ = 70
 
 class FaceFrame(Frame):
 
-  def __init__(self, master=None):
+  def __init__(self, master=None, isSuspectFace=False):
     Frame.__init__(self, master)
     self.master = master
+    self.isSuspectFace = isSuspectFace
 
     self.imageLabel = Label(self)
     self.renderLabelImage('./assets/empty_face.JPG')
     self.imageLabel.pack(side=TOP)
 
+    # time label
     self.textLabel = Label(self)
     self.textLabelvar = StringVar()
     self.textLabel['textvariable'] = self.textLabelvar
     self.textLabelvar.set('No Data')
     self.textLabel.pack(side=BOTTOM)
 
+    # name label
+    if isSuspectFace:
+      self.textLabelName = Label(self)
+      self.textLabelNamevar = StringVar()
+      self.textLabelName['textvariable'] = self.textLabelNamevar
+      self.textLabelNamevar.set('No Data')
+      self.textLabelName.pack(side=BOTTOM)
+
   def setNewData(self, faceMeta):
     self.renderLabelImage(faceMeta.filepath)
     self.textLabelvar.set(faceMeta.timestamp)
+    if self.isSuspectFace:
+      self.textLabelNamevar.set(faceMeta.suspect_name)
 
   def renderLabelImage(self, path):
     load = Image.open(path)

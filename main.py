@@ -29,7 +29,7 @@ def on_close():
 @click.option('--poolsize', default=1, help='ThreadPool size base on CPU number. Recommand 4')
 @click.option('--data_folder', default='./captures/', help='Data folder for searching for input files')
 @click.option('--file_ext', default='.JPG', help='Image file extension of the camera output')
-@click.option('--scan_rate', default=1, help='How long to sleep before next file scan, should match camera dump rate')
+@click.option('--scan_rate', default=2, help='How long to sleep before next file scan, should match camera dump rate')
 @click.option('--mark_face', default=True, type=bool, help='If set to True will draw a bounding box on the output , to use GUI must turn on this flag')
 @click.option('--thread_timeout', default=0, help='Set the timeout for processing time of thread pool. If set to 0 then is not monitored')
 @click.option('--downsampling_scale', default=1, help='The scale for downsampling the image before processing')
@@ -37,12 +37,13 @@ def on_close():
 @click.option('--avoid_duplicate', default=False, type=bool, help='Whether report if already found in last frame')
 @click.option('--distance_thresh', default=0.5, type=float, help='Distance threshold of determining if is the same person')
 @click.option('--use_camera', default=True, type=bool, help='Use camera as input')
-def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera):
+@click.option('--load_suspect', default=True, type=bool, help='Load the suspect data base during initial time, suspect name is the file name')
+def main(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera, load_suspect):
   if verbose > 0:
-    print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera
+    print detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera, load_suspect
 
   view.setConfig(verbose)
-  pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera)
+  pc.setConfig(detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera, load_suspect)
   pc.setListener(view.getOnUpdate())
   pc.startUp()
 

@@ -7,5 +7,6 @@
 
 captures/
 out_test/
+suspects/
 
 test.py
