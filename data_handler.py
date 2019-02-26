@@ -34,7 +34,8 @@ class DataHandler(ThreadBaseClass):
           if self.verbose > 0: print 'Suspect name: ' + os.path.splitext(f)[0]
           unknown_image, _, _ = face_recognition.load_image_file(SUSPECT_DATABASE_PATH+f, dscale=self.downsampling_scale)
           unknown_encodings, _, _ = face_recognition.face_encodings(unknown_image, None, 1, self.landmarks_model, self.detection_model)
-          self.local_suspect_list.append((os.path.splitext(f)[0], unknown_encodings[0][0]))
+          if len(unknown_encodings) > 0:
+            self.local_suspect_list.append((os.path.splitext(f)[0], unknown_encodings[0][0]))
 
   def setListener(self, listener):
     self.updateListener = listener

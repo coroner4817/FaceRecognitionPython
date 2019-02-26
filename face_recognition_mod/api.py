@@ -166,7 +166,10 @@ def _raw_face_landmarks(face_image, face_locations=None, landmarks_model="large"
     if landmarks_model == "small":
         pose_predictor = pose_predictor_5_point
 
-    ret = [(pose_predictor(face_image, face_location), face_location) for face_location in face_locations]
+    if detection_model == 'cnn':
+      ret = [(pose_predictor(face_image, face_location.rect), face_location.rect) for face_location in face_locations]
+    else:
+      ret = [(pose_predictor(face_image, face_location), face_location) for face_location in face_locations]
     t1 = time.clock()
     return ret, t1-t0
 
