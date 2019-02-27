@@ -22,8 +22,7 @@ ALL_FACE_SIZE = 12
 SUSPECT_FACE_SIZE = 4
 
 threadLock = threading.Lock()
-# TODO: - delete img file when next img is ready to show
-#       - For 4 threads, stream should use a priority queue to maket sure early image comes first
+# TODO: - For 4 threads, stream should use a priority queue to maket sure early image comes first
 class AppView(object):
   all_face_list = [FaceMetaData(-1, 0)] * ALL_FACE_SIZE
   suspect_face_list = [FaceMetaData(-1, 0)] * SUSPECT_FACE_SIZE * 2
