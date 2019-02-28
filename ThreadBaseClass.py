@@ -2,6 +2,7 @@ import threading
 import time
 from Queue import PriorityQueue
 
+# TODO: if reach 15, the program freeze
 MAX_QUEUE_SIZE = 15
 
 class GlobalContext(object):

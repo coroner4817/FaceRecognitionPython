@@ -1,6 +1,7 @@
 import os
 import threading
 import time
+import datetime
 from ThreadBaseClass import ThreadBaseClass
 from MetaData import MetaData
 import cv2
@@ -31,7 +32,7 @@ class InputMonitor(ThreadBaseClass):
         ret, frame = self.cap.read()
         if ret and self.frame_counter%(CAM_FRAME_RATE*self.scan_rate)==0:
           # dump to file
-          fname = time.strftime("%H-%M-%S")+self.file_extension
+          fname = datetime.datetime.now().strftime("%H-%M-%S-%f")+self.file_extension
           cv2.imwrite(self.data_folder+fname, frame)
           # new obj push to queue and set
           self.gc.fileSet.add(fname)

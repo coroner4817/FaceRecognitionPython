@@ -37,6 +37,10 @@ class FaceFrame(Frame):
       self.textLabelName.pack(side=BOTTOM)
 
   def setNewData(self, faceMeta):
+    if len(faceMeta.timestamp) > 8:
+      faceMeta.timestamp = faceMeta.timestamp[:8]
+    if len(faceMeta.suspect_name) > 8:
+      faceMeta.suspect_name = faceMeta.suspect_name[:8]
     self.renderLabelImage(faceMeta.filepath)
     self.textLabelvar.set(faceMeta.timestamp)
     if self.isSuspectFace:
