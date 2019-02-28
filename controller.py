@@ -22,6 +22,7 @@ from input_monitor import InputMonitor
 from ThreadBaseClass import ThreadBaseClass, GlobalContext
 from data_handler import DataHandler
 from monitor_dog import MonitorDog
+import os
 
 class Controller(object):
   ThreadBaseClassList = []
@@ -35,13 +36,19 @@ class Controller(object):
     self.mDataHandler = DataHandler(self.mGC, 'DataHandler')
     self.ThreadBaseClassList.append(self.mDataHandler)
 
-  def setConfig(self, detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera, load_suspect):
+  def setConfig(self, detection_model, landmarks_model, verbose, poolsize, data_folder, file_ext, scan_rate, mark_face, thread_timeout, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, use_camera, load_suspect, out_folder):
     self.mInputMonitor.setConfig(data_folder, file_ext, scan_rate, use_camera)
-    self.mDataHandler.setConfig(detection_model, landmarks_model, verbose, poolsize, mark_face, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, file_ext, load_suspect)
+    self.mDataHandler.setConfig(detection_model, landmarks_model, verbose, poolsize, mark_face, downsampling_scale, post_handle, avoid_duplicate, distance_thresh, file_ext, load_suspect, out_folder)
     if thread_timeout > 0:
       self.mMonitorDog = MonitorDog(self.mGC, 'MonitorDog')
       self.ThreadBaseClassList.append(self.mMonitorDog)
       self.mMonitorDog.setConfig(thread_timeout)
+    
+    # clean up capture and temp folder
+    for f in os.listdir(data_folder):
+      os.remove(data_folder + f)
+    for f in os.listdir(out_folder):
+      os.remove(out_folder + f)
 
   def setListener(self, listener):
     self.mDataHandler.setListener(listener)

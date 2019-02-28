@@ -8,15 +8,22 @@ import numpy as np
 from PostHandler import postHandler
 from AppGUI.AppView import UpdateType
 import os
+import cv2
 
 
 SUSPECT_DATABASE_PATH = './suspects/'
+OPENCV_MODEL_PATH = './models/'
 
 class DataHandler(ThreadBaseClass):
   last_encoding = []
 
-  def setConfig(self, dm, lm, v, ps, mf, ds, ph, ad, dt, fe, ls):
+  def setConfig(self, dm, lm, v, ps, mf, ds, ph, ad, dt, fe, ls, of):
     self.detection_model = dm
+    if self.detection_model != 'hog' and self.detection_model != 'cnn':
+      self.cascade_detector = cv2.CascadeClassifier(OPENCV_MODEL_PATH + self.detection_model + '.xml')
+      if self.cascade_detector.empty():
+        print 'load opencv error'
+
     self.landmarks_model = lm
     self.verbose = v
     self.poolsize = ps
@@ -26,6 +33,7 @@ class DataHandler(ThreadBaseClass):
     self.avoid_duplicate = ad
     self.distance_thresh = dt
     self.load_suspect = ls
+    self.out_folder = of
     self.local_suspect_list = []
     if self.load_suspect:
       # load suspect database first, assume each database only have one face
@@ -33,7 +41,8 @@ class DataHandler(ThreadBaseClass):
         if f.endswith(fe):
           if self.verbose > 0: print 'Suspect name: ' + os.path.splitext(f)[0]
           unknown_image, _, _ = face_recognition.load_image_file(SUSPECT_DATABASE_PATH+f, dscale=self.downsampling_scale)
-          unknown_encodings, _, _ = face_recognition.face_encodings(unknown_image, None, 1, self.landmarks_model, self.detection_model)
+          # assume suspet image is very easy to detect face so use hog
+          unknown_encodings, _, _ = face_recognition.face_encodings(unknown_image, None, 1, self.landmarks_model, 'hog')
           if len(unknown_encodings) > 0:
             self.local_suspect_list.append((os.path.splitext(f)[0], unknown_encodings[0][0]))
 
@@ -72,13 +81,25 @@ class DataHandler(ThreadBaseClass):
         # TODO: figure out which downsample resample filter
         # also detection and recognition which is more critical
         # might use downsample for detection and use original image for recognition
+        unknown_encodings = None
+        t_detect = None
+        t_recog = None
         unknown_image, t_load, t_preProc = face_recognition.load_image_file(handle.filepath + handle.filename, dscale=self.downsampling_scale)
         # Scale down image if it's giant so things run a little faster
         # if max(unknown_image.shape) > 1600:
         #   pil_img = PIL.Image.fromarray(unknown_image)
         #   pil_img.thumbnail((1600, 1600), PIL.Image.LANCZOS)
         #   unknown_image = np.array(pil_img)
-        unknown_encodings, t_detect, t_recog = face_recognition.face_encodings(unknown_image, None, 1, self.landmarks_model, self.detection_model)
+        if self.detection_model == 'hog' or self.detection_model == 'cnn':
+          unknown_encodings, t_detect, t_recog = face_recognition.face_encodings(unknown_image, None, 1, self.landmarks_model, self.detection_model)
+        else:
+          t_detect = time.clock()
+          faces = self.cascade_detector.detectMultiScale(unknown_image, 1.3, 5)
+          detected_faces = []
+          for (x, y, w, h) in faces:
+            detected_faces.append((y, x+w, y+h, x))
+          t_detect = time.clock() - t_detect
+          unknown_encodings, _, t_recog = face_recognition.face_encodings(unknown_image, detected_faces, 1, self.landmarks_model)
 
         # post handler
         t_post = time.clock()
@@ -93,7 +114,7 @@ class DataHandler(ThreadBaseClass):
         self.last_encoding = unknown_encodings
 
         if self.post_handle:
-          face_info_dict, stream_path = postHandler(handle, valid_encoding, self.downsampling_scale, self.mark_face, self.distance_thresh, self.local_suspect_list)
+          face_info_dict, stream_path = postHandler(self.out_folder, handle, valid_encoding, self.downsampling_scale, self.mark_face, self.distance_thresh, self.local_suspect_list)
           self.updateListener(UpdateType.STREAM, stream_path)
           self.updateListener(UpdateType.DETECTION, face_info_dict)
 

@@ -8,5 +8,6 @@
 captures/
 out_test/
 suspects/
+models/
 
 test.py

@@ -17,13 +17,12 @@ import face_recognition_mod.api as face_recognition
 import numpy as np
 import cv2
 
-out_test_folder = './out_test/'
 
 def compareFaceLocal():
   # TODO:
   pass
 
-def postHandler(meta, embeddings, dscale, mark_face, dist_thresh, local_suspect_list):
+def postHandler(out_test_folder, meta, embeddings, dscale, mark_face, dist_thresh, local_suspect_list):
   meta_dst = out_test_folder + meta.timestamp + '_meta.csv'
   img_out_dst = out_test_folder + meta.filename
   img_ori_dir = meta.filepath + meta.filename
