@@ -68,15 +68,25 @@ def postHandler(out_test_folder, meta, embeddings, dscale, mark_face, dist_thres
 
     # use opencv
     im = cv2.imread(img_out_dst)
+    width, height = im.GetSize()
 
     for eb in embeddings:
-      cropped = im[eb[1][1].top()*dscale : eb[1][1].bottom()*dscale, eb[1][1].left()*dscale : eb[1][1].right()*dscale]
+      lt = (eb[1][1].left()*dscale, eb[1][1].top()*dscale)
+      rb = (eb[1][1].right()*dscale, eb[1][1].bottom()*dscale)
+      if lt[0] < 0: lt[0] = 0
+      if lt[1] < 0: lt[1] = 0
+      if rb[0] > width: rb[0] = width
+      if rb[1] > height: rb[1] = height
+
+      cropped = im[lt[1] : rb[1], lt[0] : rb[0]]
       path = out_test_folder + meta.timestamp + '_crop_' + str(eb[0]) + '.JPG'
       cv2.imwrite(path, cropped)
       face_map[eb[0]].filepath = path
     
     for eb in embeddings:
-      cv2.rectangle(im, (eb[1][1].left()*dscale, eb[1][1].top()*dscale), (eb[1][1].right()*dscale, eb[1][1].bottom()*dscale), color=(0,0,255), thickness=3)
+      lt = (eb[1][1].left()*dscale, eb[1][1].top()*dscale)
+      rb = (eb[1][1].right()*dscale, eb[1][1].bottom()*dscale)
+      cv2.rectangle(im, lt, rb, color=(0,0,255), thickness=3)
     cv2.imwrite(img_out_dst, im)
 
   # TODO: delete meta file and croped face and frame images, delay deletion
